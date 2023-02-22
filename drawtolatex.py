@@ -1,5 +1,6 @@
 import sys
 import xml.etree.ElementTree as ET
+import random
 
 
 class Elem:
@@ -22,6 +23,15 @@ class Entity(Pos):
 
     def __repr__(self):
         return f"{self.name}: {'Weak ' if self.weak else ''}Entity (x: {self.x}, y: {self.y})"
+
+
+class Attribute(Pos):
+    def __init__(self, x: float, y: float, id: str, name: str):
+        super().__init__(x, y, id)
+        self.name: str = name
+
+    def __repr__(self):
+        return f"{self.name}: Attribute (x: {self.x}, y: {self.y})"
 
 
 class Relationship(Pos):
@@ -50,7 +60,7 @@ diagram = root[0]
 cells = diagram[0][0]
 elems: list[Elem] = []
 elem_map = {}
-scaling_factor = 100
+scaling_factor = 30
 
 (minx, miny) = (sys.maxsize, sys.maxsize)
 
@@ -60,18 +70,21 @@ for cell in cells:
     y: float = 0
     name: str = ""
     if cell.get("value") is not None:
-        x = float(cell[0].get("x")) / scaling_factor
-        y = float(cell[0].get("y")) / scaling_factor
-        minx = min(minx, x)
-        miny = min(miny, y)
+        x = (float(cell[0].get("x")) + float(cell[0].get("width"))/2) / scaling_factor
+        y = -(float(cell[0].get("y")) + float(cell[0].get("width"))/2) / scaling_factor
+        minx = min(minx, abs(x))
+        miny = -min(miny, abs(y))
         name = cell.get("value")
-        elem_map[id] = name
+        elem_map[id] = name[0:4] + str(random.randint(0, 9))
     if cell.get("style") == "whiteSpace=wrap;html=1;align=center;":
         elems.append(Entity(x, y, id, name))
         print("Normal entity set")
     elif cell.get("style") == "shape=ext;margin=3;double=1;whiteSpace=wrap;html=1;align=center;":
         elems.append(Entity(x, y, id, name, True))
         print("Weak entity set")
+    elif cell.get("style") == "ellipse;whiteSpace=wrap;html=1;align=center;":
+        elems.append(Attribute(x, y, id, name))
+        print("Attribute")
     elif cell.get("style") == "shape=rhombus;double=1;perimeter=rhombusPerimeter;whiteSpace=wrap;html=1;align=center;":
         elems.append(Relationship(x, y, id, name, True))
         print("Identifying relationship set")
@@ -86,4 +99,13 @@ print(elem_map)
 
 for elem in elems:
     if isinstance(elem, Entity):
-        print(r"\draw " f"node[entity] ({elem.name}) at {elem.x-minx, elem.y-miny} " + "{" + elem.name + "};")
+        print(r"\draw " f"node[entity{f', double' if elem.weak else ''}] ({elem_map[elem.id]}) at {elem.x-minx, elem.y-miny} " + "{" + elem.name + "};")
+for elem in elems:
+    if isinstance(elem, Relationship):
+        print(r"\draw " f"node[relationship{f', double' if elem.weak else ''}] ({elem_map[elem.id]}) at {elem.x-minx, elem.y-miny} " + "{" + elem.name + "};")
+for elem in elems:
+    if isinstance(elem, Attribute):
+        print(r"\draw " f"node[attribute] ({elem_map[elem.id]}) at {elem.x-minx, elem.y-miny} " + "{" + elem.name + "};")
+for elem in elems:
+    if isinstance(elem, Arrow):
+        print(r"\draw" f"[-Latex] ({elem_map[elem.source]}) -- ({elem_map[elem.target]});")
