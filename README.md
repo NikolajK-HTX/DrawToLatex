@@ -33,7 +33,7 @@ Remember to have *tikz* imported with `\usepackage{tikz}` and
 
 ## Extra commands
 
-If you want then you can use instead
+If you want then you can use
 
 ```tex
 \newcommand{\key}[1]{\uline{#1}}
@@ -41,3 +41,10 @@ If you want then you can use instead
 ```
 
 and then you can use `\key{<text>}` instead of `\uline{<text>}`.
+
+## Test
+Feel free to test the program out on the provided `er.xml` with:
+
+```python
+$ python3 drawtolatex.py er.xml
+```
