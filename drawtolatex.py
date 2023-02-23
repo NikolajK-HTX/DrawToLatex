@@ -1,6 +1,7 @@
 import sys
 import xml.etree.ElementTree as ET
 import random
+import logging
 
 
 class Elem:
@@ -54,7 +55,7 @@ class Arrow(Elem):
         return f"Arrow from {self.source} to {self.target}"
 
 
-tree = ET.parse("er.xml")
+tree = ET.parse(sys.argv[1])
 root = tree.getroot()
 diagram = root[0]
 cells = diagram[0][0]
@@ -78,24 +79,24 @@ for cell in cells:
         elem_map[id] = name[0:4] + str(random.randint(0, 9))
     if cell.get("style") == "whiteSpace=wrap;html=1;align=center;":
         elems.append(Entity(x, y, id, name))
-        print("Normal entity set")
+        logging.info("Normal entity set")
     elif cell.get("style") == "shape=ext;margin=3;double=1;whiteSpace=wrap;html=1;align=center;":
         elems.append(Entity(x, y, id, name, True))
-        print("Weak entity set")
+        logging.info("Weak entity set")
     elif cell.get("style") == "ellipse;whiteSpace=wrap;html=1;align=center;":
         elems.append(Attribute(x, y, id, name))
-        print("Attribute")
+        logging.info("Attribute")
     elif cell.get("style") == "shape=rhombus;double=1;perimeter=rhombusPerimeter;whiteSpace=wrap;html=1;align=center;":
         elems.append(Relationship(x, y, id, name, True))
-        print("Identifying relationship set")
+        logging.info("Identifying relationship set")
     elif cell.get("source") is not None:
         source: str = cell.get("source")
         target: str = cell.get("target")
         elems.append(Arrow(source, target, id))
-        print("Arrow")
+        logging.info("Arrow")
 
-print(elems)
-print(elem_map)
+logging.info(elems)
+logging.info(elem_map)
 
 for elem in elems:
     if isinstance(elem, Entity):
