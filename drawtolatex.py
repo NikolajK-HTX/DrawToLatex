@@ -109,4 +109,4 @@ for elem in elems:
         print(r"\draw " f"node[attribute] ({elem_map[elem.id]}) at {elem.x-minx, elem.y-miny} " + "{" + elem.name + "};")
 for elem in elems:
     if isinstance(elem, Arrow):
-        print(r"\draw" f"[-Latex] ({elem_map[elem.source]}) -- ({elem_map[elem.target]});")
+        print(r"\draw " f"({elem_map[elem.source]}) -- ({elem_map[elem.target]});")
